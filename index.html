@@ -69,7 +69,7 @@
 <body>
 
 <header>
-  <h1>🤖 AI Content Detector</h1>
+  <h1> AI Content Detector</h1>
   <p>Detect if text was written by ChatGPT, Claude, or other AI — free & instant</p>
 </header>
 
@@ -82,10 +82,10 @@
       <span id="charCount">0 characters</span>
     </div>
     <div class="info-box">
-      🔒 Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results are based on linguistic pattern analysis — burstiness, perplexity, sentence uniformity, and vocabulary diversity.
+       Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results are based on linguistic pattern analysis — burstiness, perplexity, sentence uniformity, and vocabulary diversity.
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="detectAI()">🔍 Detect AI Content</button>
+      <button class="btn btn-primary" onclick="detectAI()"> Detect AI Content</button>
       <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
       <button class="btn btn-secondary" onclick="loadSample('ai')">AI Sample</button>
       <button class="btn btn-secondary" onclick="loadSample('human')">Human Sample</button>
@@ -139,7 +139,7 @@
     </div>
 
     <div class="sentence-breakdown">
-      <h3>Sentence Analysis <span style="font-weight:normal;font-size:0.8rem;color:#475569">(🔴 likely AI &nbsp; 🟢 likely human)</span></h3>
+      <h3>Sentence Analysis <span style="font-weight:normal;font-size:0.8rem;color:#475569">( likely AI &nbsp; 🟢 likely human)</span></h3>
       <div class="sent-text" id="sentText"></div>
     </div>
   </div>
@@ -204,7 +204,7 @@ function updateMeta() {
 
 function detectAI() {
   const text = textInput.value.trim();
-  if (!text || text.split(/\s+/).length < 20) { alert('Please enter at least 20 words.'); return; }
+  if (!text  text.split(/\s+/).length < 20) { alert('Please enter at least 20 words.'); return; }
 
   const sentences = text.split(/[.!?]+/).map(s=>s.trim()).filter(s=>s.split(/\s+/).length > 3);
   if (sentences.length < 2) { alert('Please enter more complete sentences.'); return; }
@@ -252,13 +252,13 @@ function detectAI() {
 
   let verdict, verdictSub, badge;
   if (finalScore >= 70) {
-    verdict = '🤖 Likely AI-Generated'; badge = 'badge-ai';
+    verdict = ' Likely AI-Generated'; badge = 'badge-ai';
     verdictSub = 'High probability this text was written by an AI model. Uniform sentence structure and predictable phrasing detected.';
   } else if (finalScore >= 40) {
-    verdict = '⚠️ Mixed Content'; badge = 'badge-mixed';
+    verdict = ' Mixed Content'; badge = 'badge-mixed';
     verdictSub = 'Text shows a mix of human and AI writing patterns. May be AI-assisted or edited AI output.';
   } else {
-    verdict = '✅ Likely Human-Written'; badge = 'badge-human';
+    verdict = ' Likely Human-Written'; badge = 'badge-human';
     verdictSub = 'Text shows natural human writing patterns — varied sentence structure and diverse vocabulary.';
   }
   document.getElementById('verdict').innerHTML = verdict + `<span class="badge ${badge}">${finalScore >= 70 ? 'AI' : finalScore >= 40 ? 'Mixed' : 'Human'}</span>`;
