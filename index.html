@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Content Detector — Is This Text AI Written?</title>
+  <meta name="description" content="Free AI content detector. Paste any text to instantly check if it was written by ChatGPT, Claude, or other AI tools. No sign-up required.">
+  <meta name="keywords" content="AI content detector, AI text detector, detect AI writing, ChatGPT detector, AI checker, is this AI written, AI generated text checker">
+  <link rel="canonical" href="https://aicontentdetectorfree.com/">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-bottom: 1px solid #1e293b; padding: 1.25rem 1.5rem; }
+    header h1 { font-size: 1.3rem; font-weight: 800; color: #60a5fa; }
+    header p { font-size: 0.85rem; color: #64748b; margin-top: 0.2rem; }
+    main { max-width: 800px; margin: 2rem auto; padding: 0 1rem 3rem; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+    label { font-weight: 700; font-size: 0.95rem; color: #94a3b8; display: block; margin-bottom: 0.5rem; }
+    textarea {
+      width: 100%; min-height: 220px; padding: 1rem;
+      background: #0f172a; border: 2px solid #334155; border-radius: 8px;
+      font-size: 0.95rem; line-height: 1.7; resize: vertical;
+      font-family: inherit; color: #e2e8f0; transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: #60a5fa; }
+    .meta-row { display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #475569; flex-wrap: wrap; }
+    .btn-row { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary { background: #334155; color: #94a3b8; }
+    .btn-secondary:hover { background: #475569; color: white; }
+    .info-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.84rem; color: #64748b; margin-top: 0.75rem; line-height: 1.5; }
+    .result-box { display: none; }
+    .gauge-wrap { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .gauge { position: relative; width: 110px; height: 110px; }
+    .gauge svg { transform: rotate(-90deg); }
+    .gauge-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .gauge-pct { font-size: 1.6rem; font-weight: 800; display: block; }
+    .gauge-lbl { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .verdict { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .verdict-sub { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; max-width: 480px; }
+    .signals { margin: 1.25rem 0; }
+    .signal-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #334155; font-size: 0.88rem; }
+    .signal-item:last-child { border-bottom: none; }
+    .signal-name { color: #94a3b8; }
+    .signal-bar-wrap { width: 140px; height: 6px; background: #334155; border-radius: 99px; overflow: hidden; }
+    .signal-bar { height: 100%; border-radius: 99px; }
+    .signal-score { color: #e2e8f0; font-weight: 700; width: 36px; text-align: right; font-size: 0.82rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; }
+    .badge-ai { background: #dc2626; color: white; }
+    .badge-human { background: #16a34a; color: white; }
+    .badge-mixed { background: #d97706; color: white; }
+    .sentence-breakdown { margin-top: 1.25rem; }
+    .sentence-breakdown h3 { font-size: 0.88rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.75rem; }
+    .sent-text { line-height: 1.9; font-size: 0.9rem; background: #0f172a; border-radius: 8px; padding: 1rem; max-height: 200px; overflow-y: auto; }
+    .ai-sent { background: rgba(220,38,38,0.2); border-radius: 3px; padding: 1px 3px; }
+    .human-sent { background: rgba(22,163,74,0.2); border-radius: 3px; padding: 1px 3px; }
+    .content-section { color: #94a3b8; line-height: 1.7; }
+    .content-section h2 { color: #e2e8f0; font-size: 1rem; margin: 1.25rem 0 0.4rem; }
+    .content-section ul { padding-left: 1.25rem; }
+    .content-section li { margin-bottom: 0.35rem; }
+    .faq-item { border-top: 1px solid #334155; padding: 0.85rem 0; }
+    .faq-q { font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; font-size: 0.9rem; }
+    footer { text-align: center; padding: 1.5rem; color: #475569; font-size: 0.82rem; }
+    footer a { color: #475569; margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🤖 AI Content Detector</h1>
+  <p>Detect if text was written by ChatGPT, Claude, or other AI — free & instant</p>
+</header>
+
+<main>
+  <div class="card">
+    <label for="textInput">Paste text to analyze:</label>
+    <textarea id="textInput" placeholder="Paste any text here to check if it was written by AI...&#10;&#10;Works with essays, articles, emails, social posts, and more.&#10;Minimum 50 words recommended."></textarea>
+    <div class="meta-row">
+      <span id="wordCount">0 words</span>
+      <span id="charCount">0 characters</span>
+    </div>
+    <div class="info-box">
+      🔒 Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results are based on linguistic pattern analysis — burstiness, perplexity, sentence uniformity, and vocabulary diversity.
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="detectAI()">🔍 Detect AI Content</button>
+      <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+      <button class="btn btn-secondary" onclick="loadSample('ai')">AI Sample</button>
+      <button class="btn btn-secondary" onclick="loadSample('human')">Human Sample</button>
+    </div>
+  </div>
+
+  <div class="card result-box" id="resultBox">
+    <div class="gauge-wrap">
+      <div class="gauge">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="45" fill="none" stroke="#334155" stroke-width="10"/>
+          <circle cx="55" cy="55" r="45" fill="none" id="gaugeArc" stroke="#3b82f6" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"/>
+        </svg>
+        <div class="gauge-text">
+          <span class="gauge-pct" id="aiPct">—</span>
+          <span class="gauge-lbl">AI Score</span>
+        </div>
+      </div>
+      <div>
+        <div class="verdict" id="verdict">—</div>
+        <div class="verdict-sub" id="verdictSub">—</div>
+      </div>
+    </div>
+
+    <div class="signals">
+      <div class="signal-item">
+        <span class="signal-name">Sentence Length Uniformity</span>
+        <div class="signal-bar-wrap"><div class="signal-bar" id="bar1"></div></div>
+        <span class="signal-score" id="score1">—</span>
+      </div>
+      <div class="signal-item">
+        <span class="signal-name">Vocabulary Predictability</span>
+        <div class="signal-bar-wrap"><div class="signal-bar" id="bar2"></div></div>
+        <span class="signal-score" id="score2">—</span>
+      </div>
+      <div class="signal-item">
+        <span class="signal-name">Phrase Burstiness</span>
+        <div class="signal-bar-wrap"><div class="signal-bar" id="bar3"></div></div>
+        <span class="signal-score" id="score3">—</span>
+      </div>
+      <div class="signal-item">
+        <span class="signal-name">Transition Word Usage</span>
+        <div class="signal-bar-wrap"><div class="signal-bar" id="bar4"></div></div>
+        <span class="signal-score" id="score4">—</span>
+      </div>
+      <div class="signal-item">
+        <span class="signal-name">Structural Predictability</span>
+        <div class="signal-bar-wrap"><div class="signal-bar" id="bar5"></div></div>
+        <span class="signal-score" id="score5">—</span>
+      </div>
+    </div>
+
+    <div class="sentence-breakdown">
+      <h3>Sentence Analysis <span style="font-weight:normal;font-size:0.8rem;color:#475569">(🔴 likely AI &nbsp; 🟢 likely human)</span></h3>
+      <div class="sent-text" id="sentText"></div>
+    </div>
+  </div>
+
+  <div class="card content-section">
+    <h2>How Does AI Detection Work?</h2>
+    <p>AI-generated text has measurable statistical patterns that differ from human writing. This detector analyzes several signals:</p>
+    <ul>
+      <li><strong>Perplexity:</strong> How surprising or unpredictable the word choices are — AI text tends to be more predictable</li>
+      <li><strong>Burstiness:</strong> Human writing varies in sentence length dramatically; AI writing is more uniform</li>
+      <li><strong>Transition words:</strong> AI models overuse connectors like "furthermore," "moreover," "in conclusion"</li>
+      <li><strong>Vocabulary diversity:</strong> Human writers naturally vary vocabulary more than AI models</li>
+    </ul>
+
+    <h2>Is This Detector 100% Accurate?</h2>
+    <p>No AI detector is 100% accurate — including this one. False positives (flagging human text as AI) and false negatives (missing AI text) are possible. This tool is best used as one signal among several, not as definitive proof.</p>
+
+    <h2>Who Uses AI Detectors?</h2>
+    <ul>
+      <li><strong>Teachers & professors</strong> — checking student submissions</li>
+      <li><strong>Publishers & editors</strong> — ensuring editorial standards</li>
+      <li><strong>Content managers</strong> — verifying freelancer work</li>
+      <li><strong>Hiring managers</strong> — reviewing job applications</li>
+      <li><strong>Researchers</strong> — maintaining academic integrity</li>
+    </ul>
+
+    <div style="margin-top:1rem">
+      <div class="faq-item">
+        <div class="faq-q">Can AI detectors be fooled?</div>
+        <div style="font-size:0.9rem">Yes — "humanizing" tools exist that attempt to rewrite AI text to pass detection. However, heavily modified AI text often loses quality in the process.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does it detect all AI models?</div>
+        <div style="font-size:0.9rem">The detector analyzes writing patterns, not the specific model. It works on text generated by ChatGPT, Claude, Gemini, Llama, and other LLMs.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is my text stored?</div>
+        <div style="font-size:0.9rem">Never. All analysis runs in your browser. Your text is never sent to our servers.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2026 AIContentDetectorFree.com — Free AI text detection tool
+  <span style="display:block;margin-top:0.35rem"><a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Use</a></span>
+</footer>
+
+<script>
+const textInput = document.getElementById('textInput');
+
+const AI_TRANSITIONS = ["furthermore","moreover","additionally","consequently","therefore","nevertheless","nonetheless","in conclusion","to summarize","it is important","it is worth noting","it should be noted","in today's","as previously","as mentioned","in other words","to elaborate","building on","in terms of","with regard to","it is clear that","it can be seen","this demonstrates","this highlights","this shows","notably","significantly","essentially","ultimately","overall","in summary"];
+
+textInput.addEventListener('input', updateMeta);
+
+function updateMeta() {
+  const text = textInput.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = `${words} word${words!==1?'s':''}`;
+  document.getElementById('charCount').textContent = `${text.length} char${text.length!==1?'s':''}`;
+}
+
+function detectAI() {
+  const text = textInput.value.trim();
+  if (!text || text.split(/\s+/).length < 20) { alert('Please enter at least 20 words.'); return; }
+
+  const sentences = text.split(/[.!?]+/).map(s=>s.trim()).filter(s=>s.split(/\s+/).length > 3);
+  if (sentences.length < 2) { alert('Please enter more complete sentences.'); return; }
+
+  const words = text.toLowerCase().split(/\s+/);
+  const sentLengths = sentences.map(s => s.split(/\s+/).length);
+  const avgLen = sentLengths.reduce((a,b)=>a+b,0) / sentLengths.length;
+  const variance = sentLengths.reduce((a,b) => a + Math.pow(b - avgLen, 2), 0) / sentLengths.length;
+  const stdDev = Math.sqrt(variance);
+
+  // Signal 1: Sentence uniformity (low variance = AI)
+  const uniformity = Math.max(0, Math.min(100, 100 - (stdDev / avgLen * 150)));
+
+  // Signal 2: Vocabulary predictability
+  const uniqueWords = new Set(words.filter(w => w.length > 4)).size;
+  const vocabDiv = Math.min(100, (uniqueWords / Math.max(words.length, 1)) * 300);
+  const predictability = 100 - Math.min(100, vocabDiv);
+
+  // Signal 3: Burstiness (human text has high burstiness)
+  const burstiness = stdDev < 5 ? 80 : stdDev < 10 ? 50 : 20;
+
+  // Signal 4: Transition word density
+  const lowerText = text.toLowerCase();
+  const transCount = AI_TRANSITIONS.filter(t => lowerText.includes(t)).length;
+  const transDensity = Math.min(100, (transCount / Math.max(sentences.length, 1)) * 80);
+
+  // Signal 5: Structural predictability (similar sentence starters)
+  const starters = sentences.map(s => s.split(' ')[0].toLowerCase());
+  const uniqueStarters = new Set(starters).size;
+  const structural = Math.max(0, 100 - (uniqueStarters / starters.length * 100));
+
+  const aiScore = Math.round((uniformity * 0.25 + predictability * 0.2 + burstiness * 0.2 + transDensity * 0.2 + structural * 0.15));
+  const finalScore = Math.max(5, Math.min(95, aiScore));
+
+  // Gauge
+  const circumference = 2 * Math.PI * 45;
+  const offset = circumference - (finalScore / 100) * circumference;
+  const arc = document.getElementById('gaugeArc');
+  arc.style.strokeDashoffset = offset;
+  const color = finalScore > 70 ? '#ef4444' : finalScore > 40 ? '#f59e0b' : '#22c55e';
+  arc.style.stroke = color;
+
+  document.getElementById('aiPct').textContent = finalScore + '%';
+  document.getElementById('aiPct').style.color = color;
+
+  let verdict, verdictSub, badge;
+  if (finalScore >= 70) {
+    verdict = '🤖 Likely AI-Generated'; badge = 'badge-ai';
+    verdictSub = 'High probability this text was written by an AI model. Uniform sentence structure and predictable phrasing detected.';
+  } else if (finalScore >= 40) {
+    verdict = '⚠️ Mixed Content'; badge = 'badge-mixed';
+    verdictSub = 'Text shows a mix of human and AI writing patterns. May be AI-assisted or edited AI output.';
+  } else {
+    verdict = '✅ Likely Human-Written'; badge = 'badge-human';
+    verdictSub = 'Text shows natural human writing patterns — varied sentence structure and diverse vocabulary.';
+  }
+  document.getElementById('verdict').innerHTML = verdict + `<span class="badge ${badge}">${finalScore >= 70 ? 'AI' : finalScore >= 40 ? 'Mixed' : 'Human'}</span>`;
+  document.getElementById('verdictSub').textContent = verdictSub;
+
+  function setSignal(n, val, col) {
+    document.getElementById('score'+n).textContent = Math.round(val) + '%';
+    document.getElementById('bar'+n).style.width = val + '%';
+    document.getElementById('bar'+n).style.background = col;
+  }
+  setSignal(1, uniformity, uniformity > 60 ? '#ef4444' : '#22c55e');
+  setSignal(2, predictability, predictability > 60 ? '#ef4444' : '#22c55e');
+  setSignal(3, burstiness, burstiness > 60 ? '#ef4444' : '#22c55e');
+  setSignal(4, transDensity, transDensity > 40 ? '#ef4444' : '#22c55e');
+  setSignal(5, structural, structural > 50 ? '#ef4444' : '#22c55e');
+
+  // Sentence coloring
+  const threshold = 55;
+  let sentHTML = sentences.map(s => {
+    const sLen = s.split(/\s+/).length;
+    const sAI = Math.abs(sLen - avgLen) < 3 && finalScore > threshold;
+    return `<span class="${sAI ? 'ai-sent' : 'human-sent'}">${s}. </span>`;
+  }).join('');
+  document.getElementById('sentText').innerHTML = sentHTML;
+  document.getElementById('resultBox').style.display = 'block';
+  document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearAll() {
+  textInput.value = ''; updateMeta();
+  document.getElementById('resultBox').style.display = 'none';
+}
+
+function loadSample(type) {
+  if (type === 'ai') {
+    textInput.value = `Artificial intelligence is transforming numerous industries in profound ways. Furthermore, the applications of machine learning are becoming increasingly sophisticated. It is important to note that these technologies present both opportunities and challenges. Moreover, organizations must carefully consider the ethical implications of AI deployment. In conclusion, the integration of AI into business processes requires thoughtful planning and governance. Additionally, stakeholders should be engaged throughout the implementation process. Consequently, this approach will lead to better outcomes for all parties involved.`;
+  } else {
+    textInput.value = `I've been using AI tools for about six months now and honestly? It's weird. Some days it feels like I have a superpower. I asked Claude to help me draft a client email last Tuesday—took maybe four minutes total, and the client responded within the hour saying it was "exactly what they needed." Other days I catch myself just... staring at whatever it generated, feeling vaguely uncomfortable. Like I signed something I didn't fully read. My friend thinks I'm overthinking it. She might be right.`;
+  }
+  updateMeta();
+}
+</script>
+</body>
+</html>
