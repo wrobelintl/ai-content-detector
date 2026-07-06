@@ -27,10 +27,15 @@
   <p>Our tools run entirely in your browser. Any text, data, or content you enter into our tools is <strong>never transmitted to our servers</strong> and is <strong>never stored, logged, or shared</strong>. Your input exists only on your local device and is discarded when you close or refresh the page.</p>
 
   <h2>Information We Do Collect</h2>
+  <!-- (AICDF-DASHBOARD-FACTS-001): The prior "We use Google Analytics" line was FALSE (GA was never
+       installed) and is removed. Cloudflare Web Analytics is now CONFIRMED ACTIVE for this site via the
+       Cloudflare dashboard — it is injected at the Cloudflare edge, so there is no analytics snippet in
+       this repo's code (that is expected). It is cookieless / privacy-first. When publishing this as a
+       fresh revision, bump "Last updated" to the publish date. -->
   <ul>
-    <li><strong>Usage data:</strong> We use Google Analytics to collect anonymous information about how visitors use our site (pages visited, time on site, browser type, country). This data does not identify you personally.</li>
+    <li><strong>Analytics:</strong> We do <strong>not</strong> use Google Analytics. We use <strong>Cloudflare Web Analytics</strong>, a privacy-first, <strong>cookieless</strong> measurement tool that collects only aggregate, non-identifying metrics (such as page views, referrer, and country), does not set cookies, and does not track you across sites.</li>
     <li><strong>Advertising data:</strong> We use Google AdSense to display advertisements. Google may use cookies to show you relevant ads based on your browsing history. See Google's Privacy Policy for details.</li>
-    <li><strong>Cookies:</strong> Our advertising and analytics partners may set cookies on your device. You can control cookie preferences through your browser settings.</li>
+    <li><strong>Cookies:</strong> Our advertising partner (Google AdSense) may set cookies on your device. Cloudflare Web Analytics does <strong>not</strong> use cookies. You can control cookie preferences through your browser settings.</li>
   </ul>
 
   <h2>Google AdSense & Advertising</h2>

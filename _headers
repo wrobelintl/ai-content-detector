@@ -1,0 +1,36 @@
+# Cloudflare Pages _headers  —  DRAFT (AICDF-ANALYTICS-CACHE-001), NOT yet deployed.
+# Purpose: low-risk security headers + modest browser caching for this static HTML site.
+# Docs: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# Safety notes:
+#  - Invalid lines are ignored by Cloudflare Pages and cannot break the site.
+#  - This sets response + BROWSER cache headers. Moving the Cloudflare EDGE cache off 0%
+#    (cf-cache-status: HIT) most reliably ALSO needs a dashboard Cache Rule — see docs/04_BUILD_QUEUE.md.
+#  - Cloudflare Pages purges its cache on every deploy, so cached HTML refreshes on each push.
+#  - The 3 security headers below are already served on the live site today (verified), so they are
+#    known-compatible with the current AdSense setup. No Content-Security-Policy is added here: the
+#    page relies on inline <style>, inline <script>, and inline onclick handlers plus AdSense, so a
+#    CSP needs careful per-source testing and is deliberately left for a later, tested change.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Cache-Control: public, max-age=600, must-revalidate
+
+# Legal pages: shorter cache so policy edits propagate quickly (avoid stale-policy risk)
+/privacy.html
+  Cache-Control: public, max-age=300, must-revalidate
+/terms.html
+  Cache-Control: public, max-age=300, must-revalidate
+
+# Google Search Console verification file: always fresh so verification never breaks
+/google88a317686dc65954.html
+  Cache-Control: no-cache
+
+# SEO files: a little longer is fine (note: robots.txt is currently Cloudflare-managed at the edge,
+# so this may or may not apply until that changes — harmless either way)
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+/robots.txt
+  Cache-Control: public, max-age=3600
