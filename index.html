@@ -207,7 +207,7 @@ function updateMeta() {
 
 function detectAI() {
   const text = textInput.value.trim();
-  if (!text  text.split(/\s+/).length < 20) { alert('Please enter at least 20 words.'); return; }
+  if (!text || text.split(/\s+/).length < 20) { alert('Please enter at least 20 words.'); return; }
 
   const sentences = text.split(/[.!?]+/).map(s=>s.trim()).filter(s=>s.split(/\s+/).length > 3);
   if (sentences.length < 2) { alert('Please enter more complete sentences.'); return; }
