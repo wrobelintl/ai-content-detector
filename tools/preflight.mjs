@@ -30,14 +30,21 @@ const ADS_TXT_EXACT = 'google.com, pub-6286935824893984, DIRECT, f08c47fec0942fa
 // canonical/description: required on pages that have always had them
 // (privacy/terms historically ship without either — adding one would be a
 // public content change outside this task's scope).
+// ldjson: expected count of <script type="application/ld+json"> blocks —
+// non-executable structured data, validated separately below.
 const PAGES = {
-  'index.html':                                { adsense: 1, canonical: `${SITE}/`, description: true },
-  'how-accurate-are-ai-detectors.html':        { adsense: 1, canonical: `${SITE}/how-accurate-are-ai-detectors.html`, description: true },
-  'why-ai-detectors-give-false-positives.html':{ adsense: 1, canonical: `${SITE}/why-ai-detectors-give-false-positives.html`, description: true },
-  'how-to-use-ai-detectors-responsibly.html':  { adsense: 1, canonical: `${SITE}/how-to-use-ai-detectors-responsibly.html`, description: true },
-  'privacy.html':                              { adsense: 0, canonical: null, description: false },
-  'terms.html':                                { adsense: 0, canonical: null, description: false },
+  'index.html':                                { adsense: 1, canonical: `${SITE}/`, description: true, ldjson: 2 },
+  'how-accurate-are-ai-detectors.html':        { adsense: 1, canonical: `${SITE}/how-accurate-are-ai-detectors.html`, description: true, ldjson: 1 },
+  'why-ai-detectors-give-false-positives.html':{ adsense: 1, canonical: `${SITE}/why-ai-detectors-give-false-positives.html`, description: true, ldjson: 1 },
+  'how-to-use-ai-detectors-responsibly.html':  { adsense: 1, canonical: `${SITE}/how-to-use-ai-detectors-responsibly.html`, description: true, ldjson: 1 },
+  'privacy.html':                              { adsense: 0, canonical: null, description: false, ldjson: 0 },
+  'terms.html':                                { adsense: 0, canonical: null, description: false, ldjson: 0 },
 };
+
+// Schema.org keys that must never appear in our JSON-LD: we have no ratings,
+// reviews, prices, or offers, and inventing them is exactly the kind of
+// overclaiming this gate exists to block.
+const FORBIDDEN_LDJSON_KEYS = /"(aggregateRating|ratingValue|reviewCount|review|reviews|offers|price|priceCurrency)"\s*:/i;
 
 const REQUIRED_FILES = [
   ...Object.keys(PAGES), 'sitemap.xml', 'robots.txt', 'ads.txt', '_headers',
@@ -190,21 +197,50 @@ for (const [file, want] of Object.entries(PAGES)) {
     }
   }
 
-  // Inline JavaScript must parse (the exact failure that shipped broken for ~10 weeks)
-  const scripts = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)]
-    .map((m) => m[1]).filter((s) => s.trim());
-  for (const [i, src] of scripts.entries()) {
+  // Split inline <script> blocks: JSON-LD structured data (non-executable,
+  // validated as JSON below) vs executable JavaScript (must parse — the exact
+  // failure that shipped broken for ~10 weeks).
+  const inline = [...html.matchAll(/<script(?![^>]*\ssrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
+    .map((m) => ({ attrs: m[1], body: m[2] })).filter((s) => s.body.trim());
+  const ldjson = inline.filter((s) => /type\s*=\s*"application\/ld\+json"/i.test(s.attrs));
+  const executable = inline.filter((s) => !/type\s*=\s*"application\/ld\+json"/i.test(s.attrs));
+
+  for (const [i, s] of executable.entries()) {
     try {
-      new vm.Script(src, { filename: `${file}#inline-${i}` });
+      new vm.Script(s.body, { filename: `${file}#inline-${i}` });
       check(true, `${file}: inline script ${i} parses`);
     } catch (e) {
       check(false, `${file}: inline script ${i} parses`, e.message);
     }
   }
 
-  // Education pages carry no inline scripts at all (AdSense loader only)
+  // JSON-LD: expected count, must parse as JSON, no fake ratings/reviews/offers
+  check(ldjson.length === (want.ldjson ?? 0), `${file}: JSON-LD block count`,
+    `found ${ldjson.length}, expected ${want.ldjson ?? 0}`);
+  for (const [i, s] of ldjson.entries()) {
+    try {
+      const data = JSON.parse(s.body);
+      check(typeof data['@type'] === 'string' && typeof data['@context'] === 'string',
+        `${file}: JSON-LD ${i} has @context/@type`);
+    } catch (e) {
+      check(false, `${file}: JSON-LD ${i} is valid JSON`, e.message);
+    }
+    check(!FORBIDDEN_LDJSON_KEYS.test(s.body), `${file}: JSON-LD ${i} has no fake ratings/reviews/offers/prices`,
+      (s.body.match(FORBIDDEN_LDJSON_KEYS) ?? [''])[0]);
+  }
+  // Note: BANNED_PHRASES above already scans the whole page including JSON-LD text.
+
+  // Only the homepage may carry executable inline JavaScript
   if (file !== 'index.html') {
-    check(scripts.length === 0, `${file}: no inline scripts`, `found ${scripts.length}`);
+    check(executable.length === 0, `${file}: no executable inline scripts`, `found ${executable.length}`);
+  }
+
+  // Social metadata: og:title + og:url present; og:url must match the canonical
+  const ogUrl = html.match(/<meta property="og:url" content="([^"]+)"/)?.[1];
+  check(/<meta property="og:title" content="[^"]+"/.test(html), `${file}: og:title present`);
+  check(Boolean(ogUrl), `${file}: og:url present`);
+  if (want.canonical && ogUrl) {
+    check(ogUrl === want.canonical, `${file}: og:url matches canonical`, `og:url=${ogUrl}`);
   }
 }
 
@@ -214,10 +250,11 @@ for (const [file, want] of Object.entries(PAGES)) {
   for (const { needle, why } of DETECTOR_REQUIREMENTS) {
     check(html.includes(needle), `index.html: detector contract`, why);
   }
-  // Every onclick handler calls a function defined in the inline script,
-  // and every getElementById target exists in the markup.
-  const script = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)]
-    .map((m) => m[1]).join('\n');
+  // Every onclick handler calls a function defined in the executable inline
+  // script (JSON-LD blocks excluded), and every getElementById target exists.
+  const script = [...html.matchAll(/<script(?![^>]*\ssrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
+    .filter((m) => !/type\s*=\s*"application\/ld\+json"/i.test(m[1]))
+    .map((m) => m[2]).join('\n');
   for (const [, fn] of html.matchAll(/onclick="(\w+)\(/g)) {
     check(new RegExp(`function ${fn}\\s*\\(`).test(script),
       'index.html: onclick handler defined', `${fn}()`);
