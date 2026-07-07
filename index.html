@@ -54,6 +54,11 @@
     .badge-mixed { background: #d97706; color: white; }
     .sentence-breakdown { margin-top: 1.25rem; }
     .sentence-breakdown h3 { font-size: 0.88rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.75rem; }
+    .band-guide { display: none; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.25rem; font-size: 0.88rem; line-height: 1.6; color: #94a3b8; }
+    .band-guide h3 { font-size: 0.88rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.4rem; }
+    .band-guide ul { padding-left: 1.25rem; margin-top: 0.35rem; }
+    .band-guide li { margin-bottom: 0.35rem; }
+    .band-guide a { color: #60a5fa; }
     .sent-text { line-height: 1.9; font-size: 0.9rem; background: #0f172a; border-radius: 8px; padding: 1rem; max-height: 200px; overflow-y: auto; }
     .ai-sent { background: rgba(220,38,38,0.2); border-radius: 3px; padding: 1px 3px; }
     .human-sent { background: rgba(22,163,74,0.2); border-radius: 3px; padding: 1px 3px; }
@@ -71,7 +76,7 @@
 <body>
 
 <header>
-  <h1> AI Content Detector</h1>
+  <h1>AI Content Detector</h1>
   <p>Detect if text was written by ChatGPT, Claude, or other AI — free & instant</p>
 </header>
 
@@ -84,10 +89,10 @@
       <span id="charCount">0 characters</span>
     </div>
     <div class="info-box">
-       Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results are based on linguistic pattern analysis — burstiness, perplexity, sentence uniformity, and vocabulary diversity.
+      Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results are based on linguistic pattern analysis — burstiness, perplexity, sentence uniformity, and vocabulary diversity.
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="detectAI()"> Detect AI Content</button>
+      <button class="btn btn-primary" onclick="detectAI()">Detect AI Content</button>
       <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
       <button class="btn btn-secondary" onclick="loadSample('ai')">AI Sample</button>
       <button class="btn btn-secondary" onclick="loadSample('human')">Human Sample</button>
@@ -140,8 +145,40 @@
       </div>
     </div>
 
+    <div class="band-guide" id="guideHigh">
+      <h3>What this means</h3>
+      <p>This text shows several patterns common in AI-generated writing — uniform sentence lengths and predictable phrasing. That is a signal, not proof: formulaic, heavily edited, or very formal human writing can score high too.</p>
+      <h3 style="margin-top:0.75rem">Suggested next steps</h3>
+      <ul>
+        <li>Wrote this yourself? High scores do happen to human writing — see <a href="/why-ai-detectors-give-false-positives.html">why detectors give false positives</a>. Drafts and version history are stronger evidence of authorship than any score.</li>
+        <li>Reviewing someone else's work? Treat this as one signal to look closer, not a conclusion — see <a href="/how-to-use-ai-detectors-responsibly.html">how to use detectors responsibly</a>.</li>
+        <li>Short passages make every detector less reliable — try a longer sample and compare. More in <a href="/how-accurate-are-ai-detectors.html">how accurate are AI detectors</a>.</li>
+      </ul>
+    </div>
+
+    <div class="band-guide" id="guideMid">
+      <h3>What this means</h3>
+      <p>This text mixes AI-like patterns with human-like variation. That is common for AI-assisted drafts and edited AI output — and also for ordinary human writing in a formal, structured style. This range is genuinely ambiguous.</p>
+      <h3 style="margin-top:0.75rem">Suggested next steps</h3>
+      <ul>
+        <li>Avoid drawing conclusions from a mid-range score alone — it is the least informative band. See <a href="/how-accurate-are-ai-detectors.html">what detector scores really mean</a>.</li>
+        <li>Reviewing someone's work? A conversation about how it was written tells you more than this number — see <a href="/how-to-use-ai-detectors-responsibly.html">how to use detectors responsibly</a>.</li>
+        <li>Longer, more varied samples give the signals more to work with.</li>
+      </ul>
+    </div>
+
+    <div class="band-guide" id="guideLow">
+      <h3>What this means</h3>
+      <p>This text shows the varied sentence rhythm and vocabulary typical of human writing. A low score is still not a certificate: carefully edited AI text can read as human, and no detector can rule AI involvement in or out.</p>
+      <h3 style="margin-top:0.75rem">Suggested next steps</h3>
+      <ul>
+        <li>Treat this as "no strong AI signal," not proof of human authorship — see <a href="/how-accurate-are-ai-detectors.html">how accurate are AI detectors</a>.</li>
+        <li>Reviewing someone's work? A low score is not proof either way — the same care applies as with a high one: <a href="/how-to-use-ai-detectors-responsibly.html">how to use detectors responsibly</a>.</li>
+      </ul>
+    </div>
+
     <div class="sentence-breakdown">
-      <h3>Sentence Analysis <span style="font-weight:normal;font-size:0.8rem;color:#475569">( likely AI &nbsp; 🟢 likely human)</span></h3>
+      <h3>Sentence Analysis <span style="font-weight:normal;font-size:0.8rem;color:#475569">(<span style="color:#ef4444;font-weight:700">red</span> = likely AI &nbsp;·&nbsp; <span style="color:#22c55e;font-weight:700">green</span> = likely human)</span></h3>
       <div class="sent-text" id="sentText"></div>
     </div>
   </div>
@@ -262,19 +299,22 @@ function detectAI() {
   document.getElementById('aiPct').textContent = finalScore + '%';
   document.getElementById('aiPct').style.color = color;
 
-  let verdict, verdictSub, badge;
+  let verdict, verdictSub, badge, guideId;
   if (finalScore >= 70) {
-    verdict = ' Likely AI-Generated'; badge = 'badge-ai';
-    verdictSub = 'High probability this text was written by an AI model. Uniform sentence structure and predictable phrasing detected.';
+    verdict = 'Likely AI-Generated'; badge = 'badge-ai'; guideId = 'guideHigh';
+    verdictSub = 'This text shows several patterns common in AI writing. This is a probabilistic signal, not proof.';
   } else if (finalScore >= 40) {
-    verdict = ' Mixed Content'; badge = 'badge-mixed';
-    verdictSub = 'Text shows a mix of human and AI writing patterns. May be AI-assisted or edited AI output.';
+    verdict = 'Mixed Content'; badge = 'badge-mixed'; guideId = 'guideMid';
+    verdictSub = 'Text shows a mix of human-like and AI-like writing patterns. This range is genuinely ambiguous.';
   } else {
-    verdict = ' Likely Human-Written'; badge = 'badge-human';
+    verdict = 'Likely Human-Written'; badge = 'badge-human'; guideId = 'guideLow';
     verdictSub = 'Text shows natural human writing patterns — varied sentence structure and diverse vocabulary.';
   }
   document.getElementById('verdict').innerHTML = verdict + `<span class="badge ${badge}">${finalScore >= 70 ? 'AI' : finalScore >= 40 ? 'Mixed' : 'Human'}</span>`;
   document.getElementById('verdictSub').textContent = verdictSub;
+  ['guideHigh', 'guideMid', 'guideLow'].forEach(id => {
+    document.getElementById(id).style.display = id === guideId ? 'block' : 'none';
+  });
 
   function setSignal(n, val, col) {
     document.getElementById('score'+n).textContent = Math.round(val) + '%';
