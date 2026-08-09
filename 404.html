@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — AI Content Detector</title>
+  <meta name="description" content="That page could not be found. Try the free AI content detector or read the guides on detector accuracy.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#080e1b">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-bottom: 1px solid #1e293b; padding: 1.25rem 1.5rem; }
+    header h1 { font-size: 1.3rem; font-weight: 800; color: #60a5fa; }
+    header p { font-size: 0.85rem; color: #64748b; margin-top: 0.2rem; }
+    main { max-width: 800px; margin: 2rem auto; padding: 0 1rem 3rem; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+    label { font-weight: 700; font-size: 0.95rem; color: #94a3b8; display: block; margin-bottom: 0.5rem; }
+    textarea {
+      width: 100%; min-height: 220px; padding: 1rem;
+      background: #0f172a; border: 2px solid #334155; border-radius: 8px;
+      font-size: 0.95rem; line-height: 1.7; resize: vertical;
+      font-family: inherit; color: #e2e8f0; transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: #60a5fa; }
+    .meta-row { display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.82rem; color: #475569; flex-wrap: wrap; }
+    .btn-row { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary { background: #334155; color: #94a3b8; }
+    .btn-secondary:hover { background: #475569; color: white; }
+    .info-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.84rem; color: #64748b; margin-top: 0.75rem; line-height: 1.5; }
+    .result-box { display: none; }
+    .gauge-wrap { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .gauge { position: relative; width: 110px; height: 110px; }
+    .gauge svg { transform: rotate(-90deg); }
+    .gauge-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .gauge-pct { font-size: 1.6rem; font-weight: 800; display: block; }
+    .gauge-lbl { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .verdict { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .verdict-sub { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; max-width: 480px; }
+    .signals { margin: 1.25rem 0; }
+    .signal-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #334155; font-size: 0.88rem; }
+    .signal-item:last-child { border-bottom: none; }
+    .signal-name { color: #94a3b8; }
+    .signal-bar-wrap { width: 140px; height: 6px; background: #334155; border-radius: 99px; overflow: hidden; }
+    .signal-bar { height: 100%; border-radius: 99px; }
+    .signal-score { color: #e2e8f0; font-weight: 700; width: 36px; text-align: right; font-size: 0.82rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; }
+    .badge-ai { background: #dc2626; color: white; }
+    .badge-human { background: #16a34a; color: white; }
+    .badge-mixed { background: #d97706; color: white; }
+    .sentence-breakdown { margin-top: 1.25rem; }
+    .sentence-breakdown h3 { font-size: 0.88rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.75rem; }
+    .band-guide { display: none; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.25rem; font-size: 0.88rem; line-height: 1.6; color: #94a3b8; }
+    .band-guide h3 { font-size: 0.88rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.4rem; }
+    .band-guide ul { padding-left: 1.25rem; margin-top: 0.35rem; }
+    .band-guide li { margin-bottom: 0.35rem; }
+    .band-guide a { color: #60a5fa; }
+    .sent-text { line-height: 1.9; font-size: 0.9rem; background: #0f172a; border-radius: 8px; padding: 1rem; max-height: 200px; overflow-y: auto; }
+    .ai-sent { background: rgba(220,38,38,0.2); border-radius: 3px; padding: 1px 3px; }
+    .human-sent { background: rgba(22,163,74,0.2); border-radius: 3px; padding: 1px 3px; }
+    .content-section { color: #94a3b8; line-height: 1.7; }
+    .content-section h2 { color: #e2e8f0; font-size: 1rem; margin: 1.25rem 0 0.4rem; }
+    .content-section ul { padding-left: 1.25rem; }
+    .content-section li { margin-bottom: 0.35rem; }
+    .faq-item { border-top: 1px solid #334155; padding: 0.85rem 0; }
+    .faq-q { font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; font-size: 0.9rem; }
+    footer { text-align: center; padding: 1.5rem; color: #475569; font-size: 0.82rem; }
+    footer a { color: #475569; margin: 0 0.5rem; }
+
+    /* ---- 2026 visual refresh: typography, depth and colour ---- */
+    body { background:#080e1b;
+      background-image:
+        radial-gradient(58% 42% at 18% -6%, rgba(59,130,246,.20) 0%, transparent 62%),
+        radial-gradient(46% 38% at 92% 2%, rgba(139,92,246,.17) 0%, transparent 60%);
+      background-attachment:fixed; -webkit-font-smoothing:antialiased; line-height:1.65; }
+    h1,h2,h3 { letter-spacing:-0.022em; line-height:1.22; }
+    header { background:rgba(10,17,32,.72); backdrop-filter:saturate(180%) blur(12px);
+      border-bottom:1px solid rgba(148,163,184,.14); position:sticky; top:0; z-index:40; }
+    header h1 { background:linear-gradient(100deg,#93c5fd,#c4b5fd);
+      -webkit-background-clip:text; background-clip:text; color:transparent; font-size:1.22rem; }
+    header p { color:#7e8ea8; }
+    .card { background:linear-gradient(168deg, rgba(30,41,59,.92), rgba(19,28,45,.92));
+      border:1px solid rgba(148,163,184,.15); border-radius:18px;
+      box-shadow:0 1px 2px rgba(0,0,0,.3), 0 26px 52px -28px rgba(0,0,0,.9); }
+    textarea { background:rgba(8,14,27,.85); border-color:rgba(148,163,184,.2); border-radius:12px; }
+    textarea:focus { border-color:#60a5fa; box-shadow:0 0 0 4px rgba(96,165,250,.14); }
+    .btn { border-radius:11px; letter-spacing:.005em; }
+    .btn-primary { background:linear-gradient(135deg,#3b82f6,#6366f1);
+      box-shadow:0 12px 26px -14px rgba(79,110,246,.95); }
+    .btn-primary:hover { background:linear-gradient(135deg,#2563eb,#4f46e5); transform:translateY(-1px); }
+    .btn-secondary { background:rgba(148,163,184,.12); color:#a8b6cc;
+      border:1px solid rgba(148,163,184,.2); }
+    .btn-secondary:hover { background:rgba(148,163,184,.2); color:#fff; }
+    .info-box { background:rgba(8,14,27,.6); border:1px solid rgba(148,163,184,.16);
+      border-left:3px solid #3b82f6; border-radius:0 10px 10px 0; color:#8b9ab4; }
+    main h2 { color:#e8edf6; font-size:1.2rem; font-weight:800;
+      margin-top:2.1rem; padding-top:1.1rem; border-top:1px solid rgba(148,163,184,.14); }
+    main p { color:#9fb0c8; }
+    main li { color:#9fb0c8; }
+    main strong { color:#dfe7f2; }
+    main a { color:#7dd3fc; }
+    a { transition:color .15s; }
+  
+    .nf { text-align:center; padding:1rem 0 0.5rem; }
+    .nf .code { font-size:0.78rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#60a5fa; }
+    .nf h2 { border-top:none; margin-top:.5rem; padding-top:0; font-size:1.6rem; }
+    .links { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.7rem; margin-top:1.5rem; }
+    .links a { display:block; padding:.9rem 1rem; border-radius:12px; text-decoration:none;
+      background:rgba(8,14,27,.6); border:1px solid rgba(148,163,184,.18); color:#dfe7f2; font-weight:700; font-size:.9rem; }
+    .links a:hover { border-color:#60a5fa; }
+    .links a span { display:block; font-weight:500; font-size:.79rem; color:#8b9ab4; margin-top:.15rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>AI Content Detector</h1>
+  <p>Free, private, runs in your browser</p>
+</header>
+<main>
+  <div class="card">
+    <div class="nf">
+      <div class="code">Error 404</div>
+      <h2>That page isn&rsquo;t here.</h2>
+      <p style="max-width:46ch;margin:0.6rem auto 0">The link may be out of date, or we may have moved something. The detector itself is one click away.</p>
+    </div>
+    <div class="links">
+      <a href="/">Run the AI detector<span>Paste text, get a score</span></a>
+      <a href="/why-ai-detectors-give-false-positives.html">Why false positives happen<span>Read before accusing anyone</span></a>
+      <a href="/how-accurate-are-ai-detectors.html">How accurate are AI detectors?<span>The honest answer</span></a>
+      <a href="/how-to-use-ai-detectors-responsibly.html">Using detectors responsibly<span>For teachers and editors</span></a>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -7,6 +7,8 @@
   <title>AI Text Detector — Detect AI-Written Content Free</title>
   <meta name="description" content="Free AI content detector. Paste any text to instantly check if it was written by ChatGPT, Claude, or other AI tools. No sign-up required.">
   <meta name="keywords" content="AI content detector, AI text detector, detect AI writing, ChatGPT detector, AI checker, is this AI written, AI generated text checker">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#080e1b">
   <link rel="canonical" href="https://aicontentdetectorfree.com/">
   <meta property="og:title" content="AI Text Detector — Detect AI-Written Content Free">
   <meta property="og:description" content="Free AI content detector. Paste any text to instantly check if it was written by ChatGPT, Claude, or other AI tools. No sign-up required.">
@@ -115,6 +117,40 @@
     .faq-q { font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; font-size: 0.9rem; }
     footer { text-align: center; padding: 1.5rem; color: #475569; font-size: 0.82rem; }
     footer a { color: #475569; margin: 0 0.5rem; }
+
+    /* ---- 2026 visual refresh: typography, depth and colour ---- */
+    body { background:#080e1b;
+      background-image:
+        radial-gradient(58% 42% at 18% -6%, rgba(59,130,246,.20) 0%, transparent 62%),
+        radial-gradient(46% 38% at 92% 2%, rgba(139,92,246,.17) 0%, transparent 60%);
+      background-attachment:fixed; -webkit-font-smoothing:antialiased; line-height:1.65; }
+    h1,h2,h3 { letter-spacing:-0.022em; line-height:1.22; }
+    header { background:rgba(10,17,32,.72); backdrop-filter:saturate(180%) blur(12px);
+      border-bottom:1px solid rgba(148,163,184,.14); position:sticky; top:0; z-index:40; }
+    header h1 { background:linear-gradient(100deg,#93c5fd,#c4b5fd);
+      -webkit-background-clip:text; background-clip:text; color:transparent; font-size:1.22rem; }
+    header p { color:#7e8ea8; }
+    .card { background:linear-gradient(168deg, rgba(30,41,59,.92), rgba(19,28,45,.92));
+      border:1px solid rgba(148,163,184,.15); border-radius:18px;
+      box-shadow:0 1px 2px rgba(0,0,0,.3), 0 26px 52px -28px rgba(0,0,0,.9); }
+    textarea { background:rgba(8,14,27,.85); border-color:rgba(148,163,184,.2); border-radius:12px; }
+    textarea:focus { border-color:#60a5fa; box-shadow:0 0 0 4px rgba(96,165,250,.14); }
+    .btn { border-radius:11px; letter-spacing:.005em; }
+    .btn-primary { background:linear-gradient(135deg,#3b82f6,#6366f1);
+      box-shadow:0 12px 26px -14px rgba(79,110,246,.95); }
+    .btn-primary:hover { background:linear-gradient(135deg,#2563eb,#4f46e5); transform:translateY(-1px); }
+    .btn-secondary { background:rgba(148,163,184,.12); color:#a8b6cc;
+      border:1px solid rgba(148,163,184,.2); }
+    .btn-secondary:hover { background:rgba(148,163,184,.2); color:#fff; }
+    .info-box { background:rgba(8,14,27,.6); border:1px solid rgba(148,163,184,.16);
+      border-left:3px solid #3b82f6; border-radius:0 10px 10px 0; color:#8b9ab4; }
+    main h2 { color:#e8edf6; font-size:1.2rem; font-weight:800;
+      margin-top:2.1rem; padding-top:1.1rem; border-top:1px solid rgba(148,163,184,.14); }
+    main p { color:#9fb0c8; }
+    main li { color:#9fb0c8; }
+    main strong { color:#dfe7f2; }
+    main a { color:#7dd3fc; }
+    a { transition:color .15s; }
   </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6286935824893984" crossorigin="anonymous"></script>
 </head>
@@ -134,7 +170,7 @@
       <span id="charCount">0 characters</span>
     </div>
     <div class="info-box">
-      Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results are based on linguistic pattern analysis — burstiness, perplexity, sentence uniformity, and vocabulary diversity.
+      Your text is analyzed locally in your browser. Nothing is uploaded or stored. Results come from five statistical checks on sentence structure and word choice, computed in your browser. No language model is involved.
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="detectAI()">Detect AI Content</button>
@@ -230,16 +266,25 @@
 
   <div class="card content-section">
     <h2>How Does AI Detection Work?</h2>
-    <p>AI-generated text has measurable statistical patterns that differ from human writing. This detector analyzes several signals:</p>
+    <p>AI-generated text tends to show measurable statistical patterns that differ from human writing. This detector computes five of them, entirely in your browser, and combines them into a weighted score:</p>
     <ul>
-      <li><strong>Perplexity:</strong> How surprising or unpredictable the word choices are — AI text tends to be more predictable</li>
-      <li><strong>Burstiness:</strong> Human writing varies in sentence length dramatically; AI writing is more uniform</li>
-      <li><strong>Transition words:</strong> AI models overuse connectors like "furthermore," "moreover," "in conclusion"</li>
-      <li><strong>Vocabulary diversity:</strong> Human writers naturally vary vocabulary more than AI models</li>
+      <li><strong>Sentence uniformity</strong> — the standard deviation of sentence length relative to the average. Human writing varies far more than AI writing does.</li>
+      <li><strong>Burstiness</strong> — whether long and short sentences cluster, or arrive at an even pace. Measured here from the same spread of sentence lengths.</li>
+      <li><strong>Vocabulary diversity</strong> — the ratio of distinct longer words to total words. Human writers reach for a wider range.</li>
+      <li><strong>Transition-word density</strong> — how many stock connectors like "furthermore," "moreover" and "in conclusion" appear relative to sentence count.</li>
+      <li><strong>Sentence-opening repetition</strong> — how often sentences begin the same way. AI output repeats openings more than people do.</li>
     </ul>
+    <p><strong>What this is not.</strong> Some detectors use a language model to compute true <em>perplexity</em> — how surprised a model is by your next word. This one does not, and cannot: it is a few kilobytes of JavaScript running on your device with no model behind it. What it measures is structural regularity, which correlates with AI authorship but is not the same thing. We would rather tell you exactly what runs than borrow the vocabulary of a heavier method.</p>
 
     <h2>Is This Detector 100% Accurate?</h2>
-    <p>No AI detector is 100% accurate — including this one. False positives (flagging human text as AI) and false negatives (missing AI text) are possible. This tool is best used as one signal among several, not as definitive proof.</p>
+    <p>No AI detector is 100% accurate — including this one. False positives (flagging human text as AI) and false negatives (missing AI text) are possible. This tool is best used as one signal among several, never as proof.</p>
+    <p>Three specific limits worth knowing, because they follow directly from how it works:</p>
+    <ul>
+      <li><strong>The score never leaves the 5–95 range.</strong> It is deliberately incapable of saying "definitely AI" or "definitely human", because the underlying signals do not support that certainty.</li>
+      <li><strong>Transition words are counted once each.</strong> Using "furthermore" twenty times registers the same as using it once, so the signal detects variety of stock phrasing rather than volume.</li>
+      <li><strong>Short text is unreliable.</strong> Every signal is statistical, and statistics on four sentences are noise. Paste several paragraphs for a result worth anything.</li>
+    </ul>
+    <p><strong>Never use this as the sole basis for an accusation.</strong> Formal, non-native and heavily edited writing all trigger the same structural regularity that AI output does. Read <a href="/why-ai-detectors-give-false-positives.html">why AI detectors give false positives</a> before you act on any score.</p>
 
     <h2>Who Uses AI Detectors?</h2>
     <ul>

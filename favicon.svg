@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- AIContentDetectorFree mark: a magnifier over a text baseline.
+       Original geometry, self-contained (no fonts, no external assets). -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <rect x="14" y="17" width="24" height="4" rx="2" fill="url(#g)"/>
+  <rect x="14" y="27" width="16" height="4" rx="2" fill="url(#g)" opacity="0.6"/>
+  <circle cx="38" cy="38" r="12" fill="none" stroke="url(#g)" stroke-width="5"/>
+  <rect x="46" y="46" width="12" height="5" rx="2.5" fill="url(#g)" transform="rotate(45 46 46)"/>
+</svg>
